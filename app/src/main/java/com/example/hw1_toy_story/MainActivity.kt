@@ -22,12 +22,17 @@ class MainActivity : AppCompatActivity() {
     private lateinit var textDistance: TextView
 
     private val handler = Handler(Looper.getMainLooper())//so it runs with delay
-    private val DELTA_TIME = 600L//the loop
+    private var deltaTime = 600L//the loop
+    private var useTiltMode = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        // the user's choices from the menu -
+        useTiltMode = intent.getBooleanExtra("USE_TILT", false)
+        deltaTime = intent.getLongExtra("GAME_SPEED", 600L)
 
         //building the grid
         val grid = Array(GameConfig.NUM_ROWS) { row ->
@@ -55,30 +60,46 @@ class MainActivity : AppCompatActivity() {
 
         //--Buttons--
         //left moves left and right moves the player right
-        findViewById<Button>(R.id.btn_left).setOnClickListener {
-            gameLogic.movePlayer(-1)
-            gameView.updateView(model)
-        }
-        findViewById<Button>(R.id.btn_right).setOnClickListener {
-            gameLogic.movePlayer(1)
-            gameView.updateView(model)
-        }
+        val btnLeft = findViewById<Button>(R.id.btn_left)
+        val btnRight = findViewById<Button>(R.id.btn_right)
 
-        tiltSensor = TiltSensor(
-            context = this,
-            movePlayerLeft = {
+        // if tilt mode we don't show the arrows
+        if (useTiltMode)
+        {
+            btnLeft.visibility = android.view.View.GONE
+            btnRight.visibility = android.view.View.GONE
+
+            // Only initialize the hardware sensor if we actually need it
+            tiltSensor = TiltSensor(
+                context = this,
+                movePlayerLeft = {
+                    gameLogic.movePlayer(-1)
+                    gameView.updateView(model)
+                },
+                movePlayerRight = {
+                    gameLogic.movePlayer(1)
+                    gameView.updateView(model)
+                }
+            )
+            tiltSensor.start()
+        }
+        else // show it
+        {
+            btnLeft.visibility = android.view.View.VISIBLE
+            btnRight.visibility = android.view.View.VISIBLE
+
+            btnLeft.setOnClickListener {
                 gameLogic.movePlayer(-1)
                 gameView.updateView(model)
-            },
-            movePlayerRight = {
+            }
+            btnRight.setOnClickListener {
                 gameLogic.movePlayer(1)
                 gameView.updateView(model)
             }
-        )
-        tiltSensor.start()
+        }
 
         //start loop
-        handler.postDelayed(gameLoop, DELTA_TIME)
+        handler.postDelayed(gameLoop, deltaTime)
     }
 
     private val gameLoop = object : Runnable {
@@ -106,16 +127,16 @@ class MainActivity : AppCompatActivity() {
 
                 if (model.isGameOver) {
 
-                        Toast.makeText(
-                            this@MainActivity,
-                            "GAME OVER!",
-                            Toast.LENGTH_LONG
-                        ).show()
+                    Toast.makeText(
+                        this@MainActivity,
+                        "GAME OVER!",
+                        Toast.LENGTH_LONG
+                    ).show()
 
                 }
 
                 gameView.updateView(model)
-                handler.postDelayed(this, DELTA_TIME)
+                handler.postDelayed(this, deltaTime)
             }
         }
     }
@@ -129,12 +150,18 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        tiltSensor.start()
+        if (useTiltMode)
+        {
+            tiltSensor.start()
+        }
     }
 
     override fun onPause() {
         super.onPause()
         handler.removeCallbacksAndMessages(null)
-        tiltSensor.stop()
+        if (useTiltMode)
+        {
+            tiltSensor.stop()
+        }
     }
 }
