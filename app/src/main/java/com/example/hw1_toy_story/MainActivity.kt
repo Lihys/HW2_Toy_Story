@@ -18,6 +18,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tiltSensor: TiltSensor
     private val model = GameModel()
 
+    private var mediaPlayer: android.media.MediaPlayer? = null
+
     private lateinit var textScore: TextView
     private lateinit var textDistance: TextView
 
@@ -115,7 +117,10 @@ class MainActivity : AppCompatActivity() {
 
                 //boom
                 if (model.hitObstacle) {
+
                     vibrate()
+                    playCrashSound()
+
                     if (model.lives > 0) {
                         Toast.makeText(
                             this@MainActivity,
@@ -148,6 +153,14 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
+    private fun playCrashSound() {
+        // if there's already an audio, release it, make it stop
+        mediaPlayer?.release()
+
+        mediaPlayer = android.media.MediaPlayer.create(this, R.raw.crash_sound)
+        mediaPlayer?.start()
+    }
+
     override fun onResume() {
         super.onResume()
         if (useTiltMode)
@@ -159,6 +172,10 @@ class MainActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         handler.removeCallbacksAndMessages(null)
+
+        mediaPlayer?.release()
+        mediaPlayer = null
+
         if (useTiltMode)
         {
             tiltSensor.stop()
