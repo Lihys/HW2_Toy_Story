@@ -31,11 +31,11 @@ class MenuActivity : AppCompatActivity() {
 
         //  clear the other check when clicked
         radioTilt.setOnClickListener {
-            radioArrows.isChecked = false
+            gameModeSelector.check(R.id.radio_tilt)
         }
 
         radioArrows.setOnClickListener {
-            radioTilt.isChecked = false
+            gameModeSelector.check(R.id.radio_arrows)
         }
 
         // to visually show the toggle is pressed / unpressed:
