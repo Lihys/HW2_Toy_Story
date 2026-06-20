@@ -1,7 +1,7 @@
-
 # Android Application - Toy Story themed game
+**By** Lihy Levy
 
-A Toy Story themed Android game developed in Kotlin. In the game, you can play as Woody and try to avoid falling obstacles, and collect coins. You get points based on how long you survived, and how many coins you collected.
+A Toy Story themed game developed in Kotlin. In the game, you can play as Woody and try to avoid falling obstacles, and collect coins. You get points based on how long you survived, and how many coins you collected.
 
 ## Game modes:
 The game has two control modes:
